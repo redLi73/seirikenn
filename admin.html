@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>整理券 管理画面</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #222;
+      color: #fff;
+      font-family: sans-serif;
+    }
+    label, input, button {
+      font-size: 1.5rem;
+      margin: 0.5rem;
+    }
+    input {
+      width: 6rem;
+      text-align: center;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>整理券番号 管理画面</h1>
+
+  <label for="numberInput">現在の番号：</label>
+  <input id="numberInput" type="number" min="0" placeholder="例：5" />
+  <button id="updateBtn">更新する</button>
+
+  <!-- ★ alert を無効化（方法②） -->
+  <script>
+    window.alert = function(){};
+  </script>
+
+  <!-- 互換版 Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
+
+  <script>
+    // ★ ご自身の Firebase コンソールからコピーした設定に置き換えてください ★
+    const firebaseConfig = {
+      apiKey: "AIzaSyD61hQI08c8ZiIUs-HiRKLHVl3DeTaFmSA",
+      authDomain: "togensai-92cb8.firebaseapp.com",
+      databaseURL: "https://togensai-92cb8-default-rtdb.firebaseio.com",
+      projectId: "togensai-92cb8",
+      storageBucket: "togensai-92cb8.appspot.com",
+      messagingSenderId: "98670394706",
+      appId: "1:98670394706:web:b9f9ce966cbccf1f61ce8b"
+    };
+
+    // Firebase 初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ページ読み込み時に現在の番号をフォームに反映
+    const refNum = db.ref('currentNumber');
+    refNum.on('value', snap => {
+      const num = snap.val();
+      if (num !== null) {
+        document.getElementById('numberInput').value = num;
+      }
+    });
+
+    // 「更新する」ボタンで番号を上書き
+    document.getElementById('updateBtn').addEventListener('click', () => {
+      const val = Number(document.getElementById('numberInput').value);
+      if (isNaN(val)) {
+        // alert は無効化されているので何も表示されません
+        console.warn('番号を正しく入力してください');
+        return;
+      }
+      db.ref('currentNumber').set(val)
+        .then(() => {
+          // ここで alert() を呼んでも何も起きません
+          alert(`${val} を登録しました`);
+        })
+        .catch(err => {
+          console.error('Firebase 書き込みエラー:', err);
+        });
+    });
+  </script>
+</body>
+</html>
